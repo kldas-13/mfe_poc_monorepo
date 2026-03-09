@@ -1,4 +1,4 @@
-# Unified Canvas — System README
+# Meta-Shell — System README
 
 A micro-frontend platform built with **qiankun**, **Fastify**, **Graphology + Sigma.js**, and **bpmn-js**. Four independent repositories that run together as one system.
 
