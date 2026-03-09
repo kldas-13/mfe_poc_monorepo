@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Unified Canvas</title>
+  <!--
+  ╔══════════════════════════════════════════════════════════╗
+  ║              UNIFIED CANVAS — META SHELL                 ║
+  ╠══════════════════════════════════════════════════════════╣
+  ║  ARCHITECTURE                                            ║
+  ║  ─────────────────────────────────────────────────────  ║
+  ║  This shell orchestrates micro-frontends with qiankun.  ║
+  ║  Each MFE is a completely independent Vite app that      ║
+  ║  exposes bootstrap/mount/unmount lifecycle exports.      ║
+  ║                                                          ║
+  ║  PORT MAP (all must be running for full functionality)   ║
+  ║  ─────────────────────────────────────────────────────  ║
+  ║  meta-bff           :3000   REST + SSE + WS             ║
+  ║  graph-canvas-bff   :3001   REST + SSE + WS             ║
+  ║  bpmn-canvas-bff    :3002   REST + SSE + WS             ║
+  ║  meta-shell         :5173   ← this app                  ║
+  ║  graph-canvas-mfe   :5174   qiankun remote entry        ║
+  ║  bpmn-canvas-mfe    :5175   qiankun remote entry        ║
+  ║                                                          ║
+  ║  QUICK START                                             ║
+  ║  ─────────────────────────────────────────────────────  ║
+  ║  1. Start all other repos (npm run dev in each)         ║
+  ║  2. npm install && npm run dev                          ║
+  ║  3. Open http://localhost:5173                          ║
+  ╚══════════════════════════════════════════════════════════╝
+  -->
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #0a0e1a;
+      color: #e2e8f0;
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

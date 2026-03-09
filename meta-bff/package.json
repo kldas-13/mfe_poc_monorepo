@@ -1,0 +1,24 @@
+{
+  "name": "meta-bff",
+  "version": "1.0.0",
+  "description": "Aggregation BFF for the Meta Shell. Probes all downstream services and streams live health snapshots via REST, SSE, and WebSocket.",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx --watch src/index.ts",
+    "start": "node --loader tsx/esm src/index.ts"
+  },
+  "dependencies": {
+    "@fastify/cors": "^9.0.1",
+    "@fastify/websocket": "^10.0.1",
+    "fastify": "^4.26.2"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "pino-pretty": "^13.1.3",
+    "tsx": "^4.7.1",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
