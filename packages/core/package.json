@@ -15,7 +15,8 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "tsup": "^8.0.0",
