@@ -1,41 +1,42 @@
 {
-  "name": "meta-ux-composer",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "prepare": "husky",
-    "dev": "pnpm -r --parallel dev",
-    "build": "pnpm -r build",
-    "lint": "pnpm -r lint"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "packageManager": "pnpm@10.18.0",
-  "devDependencies": {
-    "@commitlint/cli": "^20.4.3",
-    "@commitlint/config-conventional": "^20.4.3",
-    "@typescript-eslint/eslint-plugin": "^8.57.0",
-    "@typescript-eslint/parser": "^8.57.0",
-    "eslint": "^10.0.3",
-    "eslint-config-prettier": "^10.1.8",
-    "husky": "^9.1.7",
-    "lint-staged": "^16.3.3",
-    "prettier": "^3.8.1",
-    "typescript": "~5.9.3",
-    "vite": "^7.3.1"
-  },
-  "lint-staged": {
-    "apps/**/*.{ts,tsx}": [
-      "pnpm --filter @meta-ux/composer lint",
-      "pnpm --filter @meta-ux/mfe lint"
-    ],
-    "packages/**/*.{ts}": [
-      "pnpm -r --filter './packages/**' lint"
-    ],
-    "**/*.{json,md,yaml}": [
-      "prettier --write"
-    ]
-  }
+    "name": "meta-ux-composer",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "prepare": "husky",
+        "dev": "pnpm -r --parallel dev",
+        "build": "pnpm -r build",
+        "lint": "pnpm -r lint"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "type": "module",
+    "packageManager": "pnpm@10.18.0",
+    "devDependencies": {
+        "@commitlint/cli": "^20.4.3",
+        "@commitlint/config-conventional": "^20.4.3",
+        "@typescript-eslint/eslint-plugin": "^8.57.0",
+        "@typescript-eslint/parser": "^8.57.0",
+        "eslint": "^10.0.3",
+        "eslint-config-prettier": "^10.1.8",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.3.3",
+        "prettier": "^3.8.1",
+        "typescript": "~5.9.3",
+        "vite": "^7.3.1"
+    },
+    "lint-staged": {
+        "apps/**/*.{ts,tsx}": [
+            "pnpm --filter @meta-ux/composer lint",
+            "pnpm --filter @meta-ux/mfe lint"
+        ],
+        "packages/**/*.{ts}": [
+            "pnpm -r --filter './packages/**' lint"
+        ],
+        "**/*.{json,md,yaml}": [
+            "prettier --write"
+        ]
+    }
 }
