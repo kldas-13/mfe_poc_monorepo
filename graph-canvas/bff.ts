@@ -41,24 +41,24 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import Fastify  from 'fastify'
-import cors     from '@fastify/cors'
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import wsPlugin from '@fastify/websocket'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GraphNode {
-  id:     string
-  label:  string
-  group:  'shell' | 'bff' | 'mfe' | 'lib' | 'infra'
+  id: string
+  label: string
+  group: 'shell' | 'bff' | 'mfe' | 'lib' | 'infra'
   weight: number          // controls rendered node size
 }
 
 interface GraphEdge {
-  id:     string
+  id: string
   source: string
   target: string
-  label:  string
+  label: string
 }
 
 interface Topology {
@@ -67,8 +67,8 @@ interface Topology {
 }
 
 interface Metric {
-  nodeId:    string
-  rps:       number
+  nodeId: string
+  rps: number
   latencyMs: number
   errorRate: number       // 0.0 – 1.0
 }
@@ -79,42 +79,42 @@ interface Metric {
 
 const topology: Topology = {
   nodes: [
-    { id: 'meta-shell',  label: 'Meta Shell',       group: 'shell', weight: 10 },
-    { id: 'meta-bff',    label: 'Meta BFF',         group: 'bff',   weight: 8  },
-    { id: 'graph-bff',   label: 'Graph BFF',        group: 'bff',   weight: 7  },
-    { id: 'bpmn-bff',    label: 'BPMN BFF',         group: 'bff',   weight: 7  },
-    { id: 'graph-mfe',   label: 'Graph MFE',        group: 'mfe',   weight: 6  },
-    { id: 'bpmn-mfe',    label: 'BPMN MFE',         group: 'mfe',   weight: 6  },
-    { id: 'qiankun',     label: 'qiankun',          group: 'infra', weight: 9  },
-    { id: 'eventbus',    label: 'EventBus',         group: 'infra', weight: 7  },
-    { id: 'graphology',  label: 'Graphology',       group: 'lib',   weight: 5  },
-    { id: 'sigma',       label: 'Sigma.js',         group: 'lib',   weight: 5  },
-    { id: 'bpmn-js',     label: 'bpmn-js',          group: 'lib',   weight: 5  },
-    { id: 'fastify',     label: 'Fastify',          group: 'lib',   weight: 4  },
+    { id: 'meta-shell', label: 'Meta Shell', group: 'shell', weight: 10 },
+    { id: 'meta-bff', label: 'Meta BFF', group: 'bff', weight: 8 },
+    { id: 'graph-bff', label: 'Graph BFF', group: 'bff', weight: 7 },
+    { id: 'bpmn-bff', label: 'BPMN BFF', group: 'bff', weight: 7 },
+    { id: 'graph-mfe', label: 'Graph MFE', group: 'mfe', weight: 6 },
+    { id: 'bpmn-mfe', label: 'BPMN MFE', group: 'mfe', weight: 6 },
+    { id: 'qiankun', label: 'qiankun', group: 'infra', weight: 9 },
+    { id: 'eventbus', label: 'EventBus', group: 'infra', weight: 7 },
+    { id: 'graphology', label: 'Graphology', group: 'lib', weight: 5 },
+    { id: 'sigma', label: 'Sigma.js', group: 'lib', weight: 5 },
+    { id: 'bpmn-js', label: 'bpmn-js', group: 'lib', weight: 5 },
+    { id: 'fastify', label: 'Fastify', group: 'lib', weight: 4 },
   ],
   edges: [
-    { id: 'e01', source: 'meta-shell',  target: 'qiankun',    label: 'orchestrates'  },
-    { id: 'e02', source: 'qiankun',     target: 'graph-mfe',  label: 'mounts'        },
-    { id: 'e03', source: 'qiankun',     target: 'bpmn-mfe',   label: 'mounts'        },
-    { id: 'e04', source: 'meta-shell',  target: 'eventbus',   label: 'creates'       },
-    { id: 'e05', source: 'eventbus',    target: 'graph-mfe',  label: 'injects into'  },
-    { id: 'e06', source: 'eventbus',    target: 'bpmn-mfe',   label: 'injects into'  },
-    { id: 'e07', source: 'meta-shell',  target: 'meta-bff',   label: 'SSE + WS'      },
-    { id: 'e08', source: 'graph-mfe',   target: 'graph-bff',  label: 'SSE + WS'      },
-    { id: 'e09', source: 'bpmn-mfe',    target: 'bpmn-bff',   label: 'SSE + WS'      },
-    { id: 'e10', source: 'graph-mfe',   target: 'graphology',  label: 'store'        },
-    { id: 'e11', source: 'graphology',  target: 'sigma',       label: 'data source'  },
-    { id: 'e12', source: 'bpmn-mfe',    target: 'bpmn-js',     label: 'renderer'     },
-    { id: 'e13', source: 'meta-bff',    target: 'fastify',     label: 'built on'     },
-    { id: 'e14', source: 'graph-bff',   target: 'fastify',     label: 'built on'     },
-    { id: 'e15', source: 'bpmn-bff',    target: 'fastify',     label: 'built on'     },
+    { id: 'e01', source: 'meta-shell', target: 'qiankun', label: 'orchestrates' },
+    { id: 'e02', source: 'qiankun', target: 'graph-mfe', label: 'mounts' },
+    { id: 'e03', source: 'qiankun', target: 'bpmn-mfe', label: 'mounts' },
+    { id: 'e04', source: 'meta-shell', target: 'eventbus', label: 'creates' },
+    { id: 'e05', source: 'eventbus', target: 'graph-mfe', label: 'injects into' },
+    { id: 'e06', source: 'eventbus', target: 'bpmn-mfe', label: 'injects into' },
+    { id: 'e07', source: 'meta-shell', target: 'meta-bff', label: 'SSE + WS' },
+    { id: 'e08', source: 'graph-mfe', target: 'graph-bff', label: 'SSE + WS' },
+    { id: 'e09', source: 'bpmn-mfe', target: 'bpmn-bff', label: 'SSE + WS' },
+    { id: 'e10', source: 'graph-mfe', target: 'graphology', label: 'store' },
+    { id: 'e11', source: 'graphology', target: 'sigma', label: 'data source' },
+    { id: 'e12', source: 'bpmn-mfe', target: 'bpmn-js', label: 'renderer' },
+    { id: 'e13', source: 'meta-bff', target: 'fastify', label: 'built on' },
+    { id: 'e14', source: 'graph-bff', target: 'fastify', label: 'built on' },
+    { id: 'e15', source: 'bpmn-bff', target: 'fastify', label: 'built on' },
   ],
 }
 
 // ─── Server ───────────────────────────────────────────────────────────────────
 
-const PORT        = Number(process.env['PORT'] ?? 3001)
-const METRICS_MS  = 5_000   // how often to push simulated metrics
+const PORT = Number(process.env['PORT'] ?? 3001)
+const METRICS_MS = 5_000   // how often to push simulated metrics
 const HEARTBEAT_MS = 20_000
 
 const app = Fastify({ logger: { level: process.env['LOG_LEVEL'] ?? 'warn' } })
@@ -124,19 +124,19 @@ await app.register(wsPlugin)
 // ─── Client registries ────────────────────────────────────────────────────────
 
 interface SseClient { id: string; write: (event: string, data: string) => void }
-interface WsClient  { id: string; socket: { send(d: string): void; readyState: number } }
+interface WsClient { id: string; socket: { send(d: string): void; readyState: number } }
 
 const sseClients = new Map<string, SseClient>()
-const wsClients  = new Map<string, WsClient>()
-const WS_OPEN    = 1
+const wsClients = new Map<string, WsClient>()
+const WS_OPEN = 1
 
 function sseSend(c: SseClient, event: string, data: string) {
-  try   { c.write(event, data) }
+  try { c.write(event, data) }
   catch { sseClients.delete(c.id) }
 }
 
 function wsSend(c: WsClient, payload: string) {
-  try   { if (c.socket.readyState === WS_OPEN) c.socket.send(payload) }
+  try { if (c.socket.readyState === WS_OPEN) c.socket.send(payload) }
   catch { wsClients.delete(c.id) }
 }
 
@@ -146,8 +146,8 @@ function wsSend(c: WsClient, payload: string) {
 
 function generateMetrics(): Metric[] {
   return topology.nodes.map((n) => ({
-    nodeId:    n.id,
-    rps:       Math.floor(Math.random() * 350),
+    nodeId: n.id,
+    rps: Math.floor(Math.random() * 350),
     latencyMs: Math.floor(Math.random() * 90) + 4,
     errorRate: parseFloat((Math.random() * 0.04).toFixed(4)),
   }))
@@ -161,10 +161,10 @@ setInterval(() => {
 
   const metrics = generateMetrics()
   const sseData = JSON.stringify({ metrics })
-  const wsData  = JSON.stringify({ type: 'graph:metrics', data: { metrics }, ts: Date.now() })
+  const wsData = JSON.stringify({ type: 'graph:metrics', data: { metrics }, ts: Date.now() })
 
   for (const c of sseClients.values()) sseSend(c, 'graph:metrics', sseData)
-  for (const c of wsClients.values())  wsSend(c, wsData)
+  for (const c of wsClients.values()) wsSend(c, wsData)
 }, METRICS_MS)
 
 // ─── REST ─────────────────────────────────────────────────────────────────────
@@ -184,13 +184,14 @@ app.get('/api/graph/topology', async () => topology)
 //   es.addEventListener('graph:metrics', e => JSON.parse(e.data))
 
 app.get('/api/graph/events', async (req, reply) => {
-  reply.raw.setHeader('Content-Type',      'text/event-stream')
-  reply.raw.setHeader('Cache-Control',     'no-cache, no-transform')
-  reply.raw.setHeader('Connection',        'keep-alive')
+  reply.raw.setHeader('Content-Type', 'text/event-stream')
+  reply.raw.setHeader('Cache-Control', 'no-cache, no-transform')
+  reply.raw.setHeader('Connection', 'keep-alive')
   reply.raw.setHeader('X-Accel-Buffering', 'no')
+  reply.raw.setHeader('Access-Control-Allow-Origin', '*')
   reply.raw.flushHeaders()
 
-  const id    = crypto.randomUUID()
+  const id = crypto.randomUUID()
   const write = (event: string, data: string) =>
     reply.raw.write(`event: ${event}\ndata: ${data}\n\n`)
 
@@ -201,7 +202,7 @@ app.get('/api/graph/events', async (req, reply) => {
 
   // 2. Heartbeat to keep proxies alive
   const hb = setInterval(() => {
-    try   { reply.raw.write(': heartbeat\n\n') }
+    try { reply.raw.write(': heartbeat\n\n') }
     catch { clearInterval(hb) }
   }, HEARTBEAT_MS)
 
@@ -210,7 +211,7 @@ app.get('/api/graph/events', async (req, reply) => {
     sseClients.delete(id)
   })
 
-  return new Promise<void>(() => {})  // keep handler alive
+  return new Promise<void>(() => { })  // keep handler alive
 })
 
 // ─── WebSocket: /ws ───────────────────────────────────────────────────────────

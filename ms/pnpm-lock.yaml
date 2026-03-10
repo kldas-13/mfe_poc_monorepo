@@ -11,6 +11,9 @@ importers:
       qiankun:
         specifier: ^2.10.16
         version: 2.10.16
+      single-spa:
+        specifier: ^5.9.5
+        version: 5.9.5
     devDependencies:
       typescript:
         specifier: ^5.3.3

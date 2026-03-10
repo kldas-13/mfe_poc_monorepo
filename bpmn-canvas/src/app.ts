@@ -55,40 +55,40 @@
 
 // bpmn-js Viewer — lighter than the full Modeler (no editing tools)
 import BpmnViewer from 'bpmn-js/lib/Viewer'
-import { qiankunWindow } from 'vite-plugin-qiankun/dist/helper'
+import { renderWithQiankun, qiankunWindow } from 'vite-plugin-qiankun/dist/helper'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const BFF           = 'http://localhost:3002'
+const BFF = 'http://localhost:3002'
 const DEFAULT_WF_ID = 'ml-pipeline'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface WorkflowSummary {
-  id:          string
-  name:        string
+  id: string
+  name: string
   description: string
 }
 
 interface Workflow extends WorkflowSummary {
-  xml:   string
+  xml: string
   steps: string[]
 }
 
 interface StepEvent {
-  workflowId:  string
-  elementId:   string
-  stepIndex:   number
-  totalSteps:  number
-  label:       string
-  ts:          number
+  workflowId: string
+  elementId: string
+  stepIndex: number
+  totalSteps: number
+  label: string
+  ts: number
 }
 
 // ─── Module-level state ───────────────────────────────────────────────────────
 
-let viewer:      InstanceType<typeof BpmnViewer> | null = null
-let sse:         EventSource | null = null
-let ws:          WebSocket   | null = null
+let viewer: InstanceType<typeof BpmnViewer> | null = null
+let sse: EventSource | null = null
+let ws: WebSocket | null = null
 let activeElemId: string | null = null   // currently highlighted element
 
 const busUnsubs: Array<() => void> = []
@@ -251,15 +251,15 @@ function injectStyles(): void {
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
 
 interface BcElements {
-  canvasEl:       HTMLElement
-  selectEl:       HTMLSelectElement
-  sseDotEl:       HTMLElement
-  wsDotEl:        HTMLElement
-  progressFill:   HTMLElement
-  progressLabel:  HTMLElement
-  progressStep:   HTMLElement
-  statusStep:     HTMLElement
-  statusWf:       HTMLElement
+  canvasEl: HTMLElement
+  selectEl: HTMLSelectElement
+  sseDotEl: HTMLElement
+  wsDotEl: HTMLElement
+  progressFill: HTMLElement
+  progressLabel: HTMLElement
+  progressStep: HTMLElement
+  statusStep: HTMLElement
+  statusWf: HTMLElement
 }
 
 function buildDOM(container: HTMLElement): BcElements {
@@ -308,15 +308,15 @@ function buildDOM(container: HTMLElement): BcElements {
   `
 
   return {
-    canvasEl:      container.querySelector<HTMLElement>('#bc-canvas')!,
-    selectEl:      container.querySelector<HTMLSelectElement>('#bc-select')!,
-    sseDotEl:      container.querySelector<HTMLElement>('#bc-sse-dot')!,
-    wsDotEl:       container.querySelector<HTMLElement>('#bc-ws-dot')!,
-    progressFill:  container.querySelector<HTMLElement>('#bc-progress-fill')!,
+    canvasEl: container.querySelector<HTMLElement>('#bc-canvas')!,
+    selectEl: container.querySelector<HTMLSelectElement>('#bc-select')!,
+    sseDotEl: container.querySelector<HTMLElement>('#bc-sse-dot')!,
+    wsDotEl: container.querySelector<HTMLElement>('#bc-ws-dot')!,
+    progressFill: container.querySelector<HTMLElement>('#bc-progress-fill')!,
     progressLabel: container.querySelector<HTMLElement>('#bc-progress-label')!,
-    progressStep:  container.querySelector<HTMLElement>('#bc-progress-step')!,
-    statusStep:    container.querySelector<HTMLElement>('#bc-status-step')!,
-    statusWf:      container.querySelector<HTMLElement>('#bc-status-wf')!,
+    progressStep: container.querySelector<HTMLElement>('#bc-progress-step')!,
+    statusStep: container.querySelector<HTMLElement>('#bc-status-step')!,
+    statusWf: container.querySelector<HTMLElement>('#bc-status-wf')!,
   }
 }
 
@@ -338,8 +338,12 @@ async function loadDiagram(canvasEl: HTMLElement, xml: string): Promise<Instance
   await v.importXML(xml)
 
   // Fit the diagram to the container on load
-  const canvas = v.get('canvas') as { zoom(mode: string): void }
-  canvas.zoom('fit-viewport')
+  try {
+    const canvas = v.get('canvas') as { zoom(mode: string): void }
+    canvas.zoom('fit-viewport')
+  } catch (e) {
+    console.warn('[bpmn-canvas] SVG scale error on fit-viewport (container may be hidden):', e)
+  }
 
   viewer = v
   return v
@@ -381,7 +385,7 @@ function clearHighlight(): void {
 
 async function populateSelect(selectEl: HTMLSelectElement): Promise<void> {
   try {
-    const res  = await fetch(`${BFF}/api/workflows`)
+    const res = await fetch(`${BFF}/api/workflows`)
     const list: WorkflowSummary[] = await res.json()
     selectEl.innerHTML = list
       .map((w) => `<option value="${w.id}">${w.name}</option>`)
@@ -401,7 +405,7 @@ function openSSE(
 
   const es = new EventSource(`${BFF}/api/workflows/${workflowId}/events`)
 
-  es.onopen  = () => { els.sseDotEl.className = 'bc-dot live' }
+  es.onopen = () => { els.sseDotEl.className = 'bc-dot live' }
   es.onerror = () => { els.sseDotEl.className = 'bc-dot' }
 
   // Full workflow + XML on connect → render the diagram immediately
@@ -413,7 +417,7 @@ function openSSE(
       await loadDiagram(els.canvasEl, workflow.xml)
       window.__UC_BUS?.emit('bpmn:workflow-loaded', {
         workflowId: workflow.id,
-        name:       workflow.name,
+        name: workflow.name,
       })
     } catch (err) {
       console.error('[bpmn-canvas] importXML failed:', err)
@@ -429,15 +433,15 @@ function openSSE(
 
     // Update progress bar
     const pct = Math.round(((step.stepIndex + 1) / step.totalSteps) * 100)
-    els.progressFill.style.width  = `${pct}%`
+    els.progressFill.style.width = `${pct}%`
     els.progressLabel.textContent = step.label
-    els.progressStep.textContent  = `${step.stepIndex + 1} / ${step.totalSteps}`
-    els.statusStep.textContent    = step.elementId
+    els.progressStep.textContent = `${step.stepIndex + 1} / ${step.totalSteps}`
+    els.statusStep.textContent = step.elementId
 
     window.__UC_BUS?.emit('bpmn:step-changed', {
       from: activeElemId ?? '',
-      to:   step.elementId,
-      ts:   step.ts,
+      to: step.elementId,
+      ts: step.ts,
     })
   })
 
@@ -445,16 +449,16 @@ function openSSE(
   es.addEventListener('workflow:complete', () => {
     clearHighlight()
     els.progressLabel.textContent = 'Pipeline complete ✓'
-    els.progressFill.style.width  = '100%'
-    els.statusStep.textContent    = 'complete'
+    els.progressFill.style.width = '100%'
+    els.statusStep.textContent = 'complete'
   })
 
   es.addEventListener('workflow:reset', () => {
     clearHighlight()
-    els.progressFill.style.width  = '0%'
+    els.progressFill.style.width = '0%'
     els.progressLabel.textContent = 'Restarting…'
-    els.progressStep.textContent  = ''
-    els.statusStep.textContent    = '—'
+    els.progressStep.textContent = ''
+    els.statusStep.textContent = '—'
   })
 
   return es
@@ -462,7 +466,7 @@ function openSSE(
 
 function openWS(els: BcElements): WebSocket {
   ws?.close()
-  const socket = new WebSocket(`ws://localhost:3002/ws`)
+  const socket = new WebSocket(`${BFF.replace('http://', 'ws://')}/ws`)
 
   socket.onopen = () => {
     els.wsDotEl.className = 'bc-dot live'
@@ -489,7 +493,7 @@ function openWS(els: BcElements): WebSocket {
         const { step } = msg.data as { step: StepEvent }
         // Only log to bus from WS to avoid double-emit with SSE
         // (In production, pick ONE transport as the authoritative source)
-        _ = step // acknowledge receipt — SSE handles the actual highlight
+        _(step) // acknowledge receipt — SSE handles the actual highlight
       }
     } catch { /* ignore malformed */ }
   }
@@ -498,7 +502,7 @@ function openWS(els: BcElements): WebSocket {
 }
 
 // silence unused var lint warning
-const _ = (_x: unknown) => {}
+const _ = (_x: unknown) => { }
 
 // ─── Workflow switcher ────────────────────────────────────────────────────────
 
@@ -512,9 +516,9 @@ function switchWorkflow(workflowId: string, els: BcElements): void {
   }
 
   // Reset progress
-  els.progressFill.style.width  = '0%'
+  els.progressFill.style.width = '0%'
   els.progressLabel.textContent = 'Loading…'
-  els.progressStep.textContent  = ''
+  els.progressStep.textContent = ''
   clearHighlight()
 }
 
@@ -522,11 +526,14 @@ function switchWorkflow(workflowId: string, els: BcElements): void {
 
 type MountProps = {
   container?: HTMLElement
-  mode?:      'card' | 'full'
+  mode?: 'card' | 'full'
 }
 
 async function mountApp(props: MountProps): Promise<void> {
-  const container = props.container ?? document.getElementById('app')!
+  const container = (props.container
+    ? (props.container.querySelector('#app') ?? props.container)
+    : document.getElementById('app')) as HTMLElement
+
   if (!container) {
     console.error('[bpmn-canvas] no container element found')
     return
@@ -545,7 +552,7 @@ async function mountApp(props: MountProps): Promise<void> {
 
   // Open connections for the default workflow
   sse = openSSE(DEFAULT_WF_ID, els)
-  ws  = openWS(els)
+  ws = openWS(els)
 }
 
 function unmountApp(): void {
@@ -564,22 +571,21 @@ function unmountApp(): void {
 // Named exports bootstrap/mount/unmount/update are required by qiankun.
 // vite-plugin-qiankun useDevMode makes them discoverable at runtime.
 
-export async function bootstrap(): Promise<void> {}
-
-export async function mount(props: Record<string, unknown>): Promise<void> {
-  await new Promise<void>((r) => requestAnimationFrame(() => r()))
-  await mountApp(props as MountProps)
-}
-
-export async function unmount(_props: Record<string, unknown>): Promise<void> {
-  unmountApp()
-}
-
-export async function update(_props: Record<string, unknown>): Promise<void> {}
+renderWithQiankun({
+  bootstrap: async () => { },
+  mount: async (props: any) => {
+    await new Promise<void>((r) => requestAnimationFrame(() => r()))
+    await mountApp(props as MountProps)
+  },
+  unmount: async (_props: any) => {
+    unmountApp()
+  },
+  update: async (_props: any) => { }
+})
 
 // ─── Standalone mode ──────────────────────────────────────────────────────────
 
-if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
+if (!(window as any).__POWERED_BY_QIANKUN__) {
   const el = document.getElementById('app')
   if (el) {
     el.style.cssText = 'height:100vh;overflow:hidden;'

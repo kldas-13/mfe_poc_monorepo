@@ -45,27 +45,27 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import Fastify  from 'fastify'
-import cors     from '@fastify/cors'
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
 import wsPlugin from '@fastify/websocket'
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface Workflow {
-  id:          string
-  name:        string
+  id: string
+  name: string
   description: string
-  steps:       string[]   // BPMN element IDs in execution order
-  xml:         string
+  steps: string[]   // BPMN element IDs in execution order
+  xml: string
 }
 
 interface StepEvent {
-  workflowId:  string
-  elementId:   string    // the currently active BPMN element
-  stepIndex:   number
-  totalSteps:  number
-  label:       string
-  ts:          number
+  workflowId: string
+  elementId: string    // the currently active BPMN element
+  stepIndex: number
+  totalSteps: number
+  label: string
+  ts: number
 }
 
 // ─── BPMN XML ─────────────────────────────────────────────────────────────────
@@ -155,7 +155,7 @@ const PIPELINE_XML = `<?xml version="1.0" encoding="UTF-8"?>
     <bpmn:sequenceFlow id="f02"      sourceRef="validate"  targetRef="iam-check" />
     <bpmn:sequenceFlow id="f03"      sourceRef="iam-check" targetRef="auth-gw"   />
     <bpmn:sequenceFlow id="f04-ok"   sourceRef="auth-gw"   targetRef="fan-out"   name="Yes"/>
-    <bpmn:sequenceFlow id="f04-fail" sourceRef="auth-gw"   targetRef="end-unauth"name="No"/>
+    <bpmn:sequenceFlow id="f04-fail" sourceRef="auth-gw"   targetRef="end-unauth" name="No"/>
     <bpmn:sequenceFlow id="f05-aof"  sourceRef="fan-out"   targetRef="aof"       />
     <bpmn:sequenceFlow id="f05-etl"  sourceRef="fan-out"   targetRef="etl"       />
     <bpmn:sequenceFlow id="f05-ml"   sourceRef="fan-out"   targetRef="ml-train"  />
@@ -207,8 +207,8 @@ const PIPELINE_XML = `<?xml version="1.0" encoding="UTF-8"?>
 
 const WORKFLOWS: Workflow[] = [
   {
-    id:          'ml-pipeline',
-    name:        'Unified Canvas ML Pipeline',
+    id: 'ml-pipeline',
+    name: 'Unified Canvas ML Pipeline',
     description: 'Validates input → IAM check → parallel AOF/ETL/ML → aggregate → notify',
     steps: [
       'start', 'validate', 'iam-check', 'auth-gw',
@@ -225,29 +225,29 @@ const workflowMap = new Map(WORKFLOWS.map((w) => [w.id, w]))
 // Maintains an independent cursor for each workflow that is currently being
 // watched by at least one client. Advances every STEP_MS milliseconds.
 
-const STEP_MS   = 2_200   // time between step transitions
-const PAUSE_MS  = 2_000   // pause after complete before looping
+const STEP_MS = 2_200   // time between step transitions
+const PAUSE_MS = 2_000   // pause after complete before looping
 
 // Map from workflowId → current step index
 const cursors = new Map<string, number>()
 
 function nextStep(workflowId: string, workflow: Workflow): StepEvent {
-  const idx    = (cursors.get(workflowId) ?? 0)
+  const idx = (cursors.get(workflowId) ?? 0)
   const elemId = workflow.steps[idx]!
   cursors.set(workflowId, idx + 1)
   return {
     workflowId,
-    elementId:  elemId,
-    stepIndex:  idx,
+    elementId: elemId,
+    stepIndex: idx,
     totalSteps: workflow.steps.length,
-    label:      elemId.replace(/-/g, ' '),
-    ts:         Date.now(),
+    label: elemId.replace(/-/g, ' '),
+    ts: Date.now(),
   }
 }
 
 // ─── Server ───────────────────────────────────────────────────────────────────
 
-const PORT        = Number(process.env['PORT'] ?? 3002)
+const PORT = Number(process.env['PORT'] ?? 3002)
 const HEARTBEAT_MS = 20_000
 
 const app = Fastify({ logger: { level: process.env['LOG_LEVEL'] ?? 'warn' } })
@@ -257,28 +257,28 @@ await app.register(wsPlugin)
 // ─── Client registries ────────────────────────────────────────────────────────
 
 interface SseClient {
-  id:         string
+  id: string
   workflowId: string
-  write:      (event: string, data: string) => void
+  write: (event: string, data: string) => void
 }
 
 interface WsClient {
-  id:         string
+  id: string
   workflowId: string
-  socket:     { send(d: string): void; readyState: number }
+  socket: { send(d: string): void; readyState: number }
 }
 
 const sseClients = new Map<string, SseClient>()
-const wsClients  = new Map<string, WsClient>()
-const WS_OPEN    = 1
+const wsClients = new Map<string, WsClient>()
+const WS_OPEN = 1
 
 function sseSend(c: SseClient, event: string, data: string) {
-  try   { c.write(event, data) }
+  try { c.write(event, data) }
   catch { sseClients.delete(c.id) }
 }
 
 function wsSend(c: WsClient, payload: string) {
-  try   { if (c.socket.readyState === WS_OPEN) c.socket.send(payload) }
+  try { if (c.socket.readyState === WS_OPEN) c.socket.send(payload) }
   catch { wsClients.delete(c.id) }
 }
 
@@ -290,7 +290,7 @@ setInterval(() => {
   // Collect unique workflow IDs currently being watched
   const activeWorkflowIds = new Set<string>()
   for (const c of sseClients.values()) activeWorkflowIds.add(c.workflowId)
-  for (const c of wsClients.values())  activeWorkflowIds.add(c.workflowId)
+  for (const c of wsClients.values()) activeWorkflowIds.add(c.workflowId)
 
   for (const wfId of activeWorkflowIds) {
     const workflow = workflowMap.get(wfId)
@@ -313,7 +313,7 @@ setInterval(() => {
       // Reset after pause
       setTimeout(() => {
         cursors.set(wfId, 0)
-        const resetPayload  = JSON.stringify({ workflowId: wfId, ts: Date.now() })
+        const resetPayload = JSON.stringify({ workflowId: wfId, ts: Date.now() })
         const wsReset = JSON.stringify({ type: 'workflow:reset', data: { workflowId: wfId }, ts: Date.now() })
         for (const c of sseClients.values()) {
           if (c.workflowId === wfId) sseSend(c, 'workflow:reset', resetPayload)
@@ -326,9 +326,9 @@ setInterval(() => {
       continue
     }
 
-    const step       = nextStep(wfId, workflow)
-    const sseData    = JSON.stringify({ step })
-    const wsPayload  = JSON.stringify({ type: 'workflow:step', data: { step }, ts: Date.now() })
+    const step = nextStep(wfId, workflow)
+    const sseData = JSON.stringify({ step })
+    const wsPayload = JSON.stringify({ type: 'workflow:step', data: { step }, ts: Date.now() })
 
     for (const c of sseClients.values()) {
       if (c.workflowId === wfId) sseSend(c, 'workflow:step', sseData)
@@ -371,13 +371,14 @@ app.get<{ Params: { id: string } }>('/api/workflows/:id/events', async (req, rep
     return
   }
 
-  reply.raw.setHeader('Content-Type',      'text/event-stream')
-  reply.raw.setHeader('Cache-Control',     'no-cache, no-transform')
-  reply.raw.setHeader('Connection',        'keep-alive')
+  reply.raw.setHeader('Content-Type', 'text/event-stream')
+  reply.raw.setHeader('Cache-Control', 'no-cache, no-transform')
+  reply.raw.setHeader('Connection', 'keep-alive')
   reply.raw.setHeader('X-Accel-Buffering', 'no')
+  reply.raw.setHeader('Access-Control-Allow-Origin', '*')
   reply.raw.flushHeaders()
 
-  const id    = crypto.randomUUID()
+  const id = crypto.randomUUID()
   const write = (event: string, data: string) =>
     reply.raw.write(`event: ${event}\ndata: ${data}\n\n`)
 
@@ -389,7 +390,7 @@ app.get<{ Params: { id: string } }>('/api/workflows/:id/events', async (req, rep
 
   // Heartbeat
   const hb = setInterval(() => {
-    try   { reply.raw.write(': heartbeat\n\n') }
+    try { reply.raw.write(': heartbeat\n\n') }
     catch { clearInterval(hb) }
   }, HEARTBEAT_MS)
 
@@ -398,7 +399,7 @@ app.get<{ Params: { id: string } }>('/api/workflows/:id/events', async (req, rep
     sseClients.delete(id)
   })
 
-  return new Promise<void>(() => {})
+  return new Promise<void>(() => { })
 })
 
 // ─── WebSocket: /ws ───────────────────────────────────────────────────────────
@@ -413,7 +414,7 @@ app.get<{ Params: { id: string } }>('/api/workflows/:id/events', async (req, rep
 
 app.register(async (instance) => {
   instance.get('/ws', { websocket: true }, (socket, _req) => {
-    const id         = crypto.randomUUID()
+    const id = crypto.randomUUID()
     const defaultWfId = WORKFLOWS[0]!.id
     wsClients.set(id, { id, workflowId: defaultWfId, socket })
 
@@ -422,7 +423,7 @@ app.register(async (instance) => {
     socket.send(JSON.stringify({
       type: 'workflow:init',
       data: { workflow: defaultWf },
-      ts:   Date.now(),
+      ts: Date.now(),
     }))
 
     socket.on('message', (raw: Buffer) => {
@@ -442,7 +443,7 @@ app.register(async (instance) => {
             socket.send(JSON.stringify({
               type: 'workflow:init',
               data: { workflow: wf },
-              ts:   Date.now(),
+              ts: Date.now(),
             }))
           }
         }

@@ -50,11 +50,11 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import Graph     from 'graphology'
-import circular  from 'graphology-layout/circular'
-import fa2       from 'graphology-layout-forceatlas2'
-import Sigma     from 'sigma'
-import { qiankunWindow } from 'vite-plugin-qiankun/dist/helper'
+import Graph from 'graphology'
+import circular from 'graphology-layout/circular'
+import fa2 from 'graphology-layout-forceatlas2'
+import Sigma from 'sigma'
+import { renderWithQiankun, qiankunWindow } from 'vite-plugin-qiankun/dist/helper'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 // Always use absolute URL — see note above about qiankun execution context.
@@ -64,24 +64,24 @@ const BFF = 'http://localhost:3001'
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface GraphNode {
-  id:     string
-  label:  string
-  group:  'shell' | 'bff' | 'mfe' | 'lib' | 'infra'
+  id: string
+  label: string
+  group: 'shell' | 'bff' | 'mfe' | 'lib' | 'infra'
   weight: number
 }
 
 interface GraphEdge {
-  id:     string
+  id: string
   source: string
   target: string
-  label:  string
+  label: string
 }
 
 interface Topology { nodes: GraphNode[]; edges: GraphEdge[] }
 
 interface Metric {
-  nodeId:    string
-  rps:       number
+  nodeId: string
+  rps: number
   latencyMs: number
   errorRate: number
 }
@@ -89,9 +89,9 @@ interface Metric {
 // Node color by group
 const GROUP_COLOR: Record<string, string> = {
   shell: '#6366f1',   // indigo
-  bff:   '#f59e0b',   // amber
-  mfe:   '#10b981',   // emerald
-  lib:   '#3b82f6',   // blue
+  bff: '#f59e0b',   // amber
+  mfe: '#10b981',   // emerald
+  lib: '#3b82f6',   // blue
   infra: '#ec4899',   // pink
 }
 
@@ -99,10 +99,10 @@ const GROUP_COLOR: Record<string, string> = {
 // One set of these per mounted MFE instance.
 // Cleared in unmount() so remounting is clean.
 
-let graph:    Graph  | null = null
-let renderer: Sigma  | null = null
-let sse:      EventSource | null = null
-let ws:       WebSocket   | null = null
+let graph: Graph | null = null
+let renderer: Sigma | null = null
+let sse: EventSource | null = null
+let ws: WebSocket | null = null
 
 // Unsubscribe functions for EventBus listeners registered during mount
 const busUnsubs: Array<() => void> = []
@@ -226,11 +226,11 @@ function injectStyles(): void {
 // ─── DOM helpers ──────────────────────────────────────────────────────────────
 
 function buildDOM(container: HTMLElement): {
-  canvasEl:   HTMLElement
-  tooltipEl:  HTMLElement
+  canvasEl: HTMLElement
+  tooltipEl: HTMLElement
   subtitleEl: HTMLElement
-  sseDotEl:   HTMLElement
-  wsDotEl:    HTMLElement
+  sseDotEl: HTMLElement
+  wsDotEl: HTMLElement
 } {
   container.innerHTML = `
     <div class="gc-root" id="gc-root">
@@ -274,11 +274,11 @@ function buildDOM(container: HTMLElement): {
   `
 
   return {
-    canvasEl:   container.querySelector<HTMLElement>('#gc-canvas')!,
-    tooltipEl:  container.querySelector<HTMLElement>('#gc-tooltip')!,
+    canvasEl: container.querySelector<HTMLElement>('#gc-canvas')!,
+    tooltipEl: container.querySelector<HTMLElement>('#gc-tooltip')!,
     subtitleEl: container.querySelector<HTMLElement>('#gc-subtitle')!,
-    sseDotEl:   container.querySelector<HTMLElement>('#gc-sse-dot')!,
-    wsDotEl:    container.querySelector<HTMLElement>('#gc-ws-dot')!,
+    sseDotEl: container.querySelector<HTMLElement>('#gc-sse-dot')!,
+    wsDotEl: container.querySelector<HTMLElement>('#gc-ws-dot')!,
   }
 }
 
@@ -292,15 +292,15 @@ function applyTopology(g: Graph, topo: Topology): void {
   for (const n of topo.nodes) {
     if (g.hasNode(n.id)) continue
     g.addNode(n.id, {
-      label:  n.label,
-      group:  n.group,
-      color:  GROUP_COLOR[n.group] ?? '#64748b',
-      size:   Math.max(6, n.weight * 2.2),
+      label: n.label,
+      group: n.group,
+      color: GROUP_COLOR[n.group] ?? '#64748b',
+      size: Math.max(6, n.weight * 2.2),
       // ForceAtlas2 will compute real positions; start on a circle
       x: Math.random(),
       y: Math.random(),
       // Extra attrs for the tooltip
-      _rps:       0,
+      _rps: 0,
       _latencyMs: 0,
       _errorRate: 0,
     })
@@ -311,7 +311,7 @@ function applyTopology(g: Graph, topo: Topology): void {
     if (!g.hasNode(e.source) || !g.hasNode(e.target)) continue
     g.addEdge(e.source, e.target, {
       label: e.label,
-      size:  1.5,
+      size: 1.5,
       color: '#1e293b',
     })
   }
@@ -327,7 +327,7 @@ function applyMetrics(g: Graph, metrics: Metric[], r: Sigma): void {
     if (!g.hasNode(m.nodeId)) continue
 
     // Scale node size by RPS (capped so it doesn't go crazy)
-    const base  = g.getNodeAttribute(m.nodeId, 'size') as number
+    const base = g.getNodeAttribute(m.nodeId, 'size') as number
     const newSz = Math.max(6, Math.min(base + m.rps / 120, 22))
     g.setNodeAttribute(m.nodeId, 'size', newSz)
 
@@ -336,7 +336,7 @@ function applyMetrics(g: Graph, metrics: Metric[], r: Sigma): void {
     g.setNodeAttribute(m.nodeId, 'color', m.errorRate > 0.03 ? '#ef4444' : baseColor)
 
     // Store metrics for tooltip
-    g.setNodeAttribute(m.nodeId, '_rps',       m.rps)
+    g.setNodeAttribute(m.nodeId, '_rps', m.rps)
     g.setNodeAttribute(m.nodeId, '_latencyMs', m.latencyMs)
     g.setNodeAttribute(m.nodeId, '_errorRate', m.errorRate)
     changed = true
@@ -352,12 +352,12 @@ function computeLayout(g: Graph): void {
   fa2.assign(g, {
     iterations: 120,
     settings: {
-      gravity:              1,
-      scalingRatio:         6,
-      slowDown:             8,
-      barnesHutOptimize:    true,
-      barnesHutTheta:       0.6,
-      linLogMode:           false,
+      gravity: 1,
+      scalingRatio: 6,
+      slowDown: 8,
+      barnesHutOptimize: true,
+      barnesHutTheta: 0.6,
+      linLogMode: false,
     },
   })
 }
@@ -366,17 +366,18 @@ function computeLayout(g: Graph): void {
 
 function createRenderer(g: Graph, el: HTMLElement): Sigma {
   return new Sigma(g, el, {
-    defaultNodeColor:              '#3b82f6',
-    defaultEdgeColor:              '#1e293b',
-    renderEdgeLabels:              true,
-    labelColor:                    { color: '#94a3b8' },
-    edgeLabelColor:                { color: '#334155' },
-    labelSize:                     11,
-    labelWeight:                   '500',
-    labelDensity:                  0.08,
-    labelGridCellSize:             80,
-    labelRenderedSizeThreshold:    5,
-    defaultNodeType:               'circle',
+    allowInvalidContainer: true,
+    defaultNodeColor: '#3b82f6',
+    defaultEdgeColor: '#1e293b',
+    renderEdgeLabels: true,
+    labelColor: { color: '#94a3b8' },
+    edgeLabelColor: { color: '#334155' },
+    labelSize: 11,
+    labelWeight: '500',
+    labelDensity: 0.08,
+    labelGridCellSize: 80,
+    labelRenderedSizeThreshold: 5,
+    defaultNodeType: 'circle',
   })
 }
 
@@ -387,18 +388,18 @@ function bindInteraction(
   tooltipEl: HTMLElement,
   onNodeClick: (nodeId: string, label: string, group: string) => void
 ): void {
-  const ttName  = document.getElementById('gc-tt-name')!
+  const ttName = document.getElementById('gc-tt-name')!
   const ttGroup = document.getElementById('gc-tt-group')!
-  const ttRps   = document.getElementById('gc-tt-rps')!
+  const ttRps = document.getElementById('gc-tt-rps')!
 
   r.on('enterNode', ({ node, event }) => {
     const a = g.getNodeAttributes(node)
-    ttName.textContent  = a['label'] as string
+    ttName.textContent = a['label'] as string
     ttGroup.textContent = `group: ${a['group']}`
-    ttRps.textContent   = `${a['_rps']} rps · ${a['_latencyMs']} ms`
+    ttRps.textContent = `${a['_rps']} rps · ${a['_latencyMs']} ms`
     tooltipEl.style.display = 'block'
-    tooltipEl.style.left    = `${(event.x) + 14}px`
-    tooltipEl.style.top     = `${(event.y) + 14}px`
+    tooltipEl.style.left = `${(event.x) + 14}px`
+    tooltipEl.style.top = `${(event.y) + 14}px`
   })
 
 
@@ -423,7 +424,7 @@ function openSSE(
 ): EventSource {
   const es = new EventSource(`${BFF}/api/graph/events`)
 
-  es.onopen  = () => { dotEl.className = 'gc-badge-dot live' }
+  es.onopen = () => { dotEl.className = 'gc-badge-dot live' }
   es.onerror = () => { dotEl.className = 'gc-badge-dot' }
 
   // Full topology on connect — populate the store and render
@@ -497,14 +498,17 @@ function openWS(
 
 type MountProps = {
   container?: HTMLElement
-  mode?:      'card' | 'full'
-  eventBus?:  typeof window.__UC_BUS
+  mode?: 'card' | 'full'
+  eventBus?: typeof window.__UC_BUS
 }
 
 async function mountApp(props: MountProps): Promise<void> {
   // qiankun passes props.container when the app is embedded in the shell.
   // In standalone mode we fall back to #app in index.html.
-  const container = props.container ?? document.getElementById('app')!
+  const container = (props.container
+    ? (props.container.querySelector('#app') ?? props.container)
+    : document.getElementById('app')) as HTMLElement
+
   if (!container) {
     console.error('[graph-canvas] no container element found')
     return
@@ -518,7 +522,7 @@ async function mountApp(props: MountProps): Promise<void> {
 
   // Bootstrap from REST first — fast initial render before SSE delivers
   try {
-    const res  = await fetch(`${BFF}/api/graph/topology`)
+    const res = await fetch(`${BFF}/api/graph/topology`)
     const topo: Topology = await res.json()
     applyTopology(graph, topo)
     computeLayout(graph)
@@ -552,7 +556,7 @@ async function mountApp(props: MountProps): Promise<void> {
 
   // ── Live data streams ───────────────────────────────────────────────────
   sse = openSSE(graph, renderer, subtitleEl, sseDotEl, handleMetrics)
-  ws  = openWS(graph, renderer, wsDotEl, handleMetrics)
+  ws = openWS(graph, renderer, wsDotEl, handleMetrics)
 }
 
 function unmountApp(): void {
@@ -573,38 +577,24 @@ function unmountApp(): void {
 }
 
 // ─── qiankun lifecycle exports ───────────────────────────────────────────────
-//
-// vite-plugin-qiankun (useDevMode: true) rewrites this module so that
-// qiankun can discover these named exports at runtime without a build step.
-//
-// Rules:
-//   • Export must be named exactly: bootstrap, mount, unmount, update
-//   • They must be async functions at module top level
-//   • Do NOT wrap them in renderWithQiankun() — that helper is for a
-//     different usage pattern and breaks useDevMode in Vite 5
+// vite-plugin-qiankun wires these up to the global scope automatically.
 
-export async function bootstrap(): Promise<void> {
-  // One-time setup. Called once before the first mount.
-}
-
-export async function mount(props: Record<string, unknown>): Promise<void> {
-  // Wait one frame so qiankun has finished injecting the container
-  await new Promise<void>((r) => requestAnimationFrame(() => r()))
-  await mountApp(props as MountProps)  // calls internal mountApp()
-}
-
-export async function unmount(_props: Record<string, unknown>): Promise<void> {
-  unmountApp()  // calls internal unmountApp()
-}
-
-export async function update(_props: Record<string, unknown>): Promise<void> {
-  // Called if the shell changes props without remounting
-}
+renderWithQiankun({
+  bootstrap: async () => { },
+  mount: async (props: any) => {
+    await new Promise<void>((r) => requestAnimationFrame(() => r()))
+    await mountApp(props as MountProps)
+  },
+  unmount: async (_props: any) => {
+    unmountApp()
+  },
+  update: async (_props: any) => { }
+})
 
 // ─── Standalone mode ──────────────────────────────────────────────────────────
 // __POWERED_BY_QIANKUN__ is false when running npm run dev:mfe directly.
 
-if (!qiankunWindow.__POWERED_BY_QIANKUN__) {
+if (!(window as any).__POWERED_BY_QIANKUN__) {
   const el = document.getElementById('app')
   if (el) {
     el.style.cssText = 'height:100vh;overflow:hidden;'

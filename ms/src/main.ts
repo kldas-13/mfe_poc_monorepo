@@ -2,42 +2,43 @@
  * main.ts — Meta Shell entry point
  */
 
-import { loadMicroApp } from 'qiankun'
+import { loadMicroApp, start, addGlobalUncaughtErrorHandler } from 'qiankun'
 import type { MicroApp } from 'qiankun'
+import { setBootstrapMaxTime, setMountMaxTime, setUnmountMaxTime } from 'single-spa'
 import { bus } from './eventbus'   // side-effect: sets window.__UC_BUS
 
 window.__UC_BUS = bus
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const META_BFF  = 'http://localhost:3000'
-const GRAPH_URL = 'http://localhost:5174/'
-const BPMN_URL  = 'http://localhost:5175/'
+const META_BFF = 'http://localhost:3000'
+const GRAPH_URL = 'http://localhost:5174/index.html'
+const BPMN_URL = 'http://localhost:5175/index.html'
 
 type Page = 'dashboard' | 'overview' | 'graph' | 'bpmn'
 
 interface ServiceRecord {
-  id:             string
-  name:           string
-  port:           number
-  status:         'healthy' | 'degraded' | 'down' | 'unknown'
-  latencyMs:      number
+  id: string
+  name: string
+  port: number
+  status: 'healthy' | 'degraded' | 'down' | 'unknown'
+  latencyMs: number
   requestsPerMin: number
 }
 
 interface DashboardSnapshot {
-  services:     ServiceRecord[]
+  services: ServiceRecord[]
   systemHealth: string
-  ts:           number
+  ts: number
 }
 
 // ─── Runtime state ────────────────────────────────────────────────────────────
 
-let activePage: Page   = 'dashboard'
-let appCounter         = 0
-const apps             = new Map<string, MicroApp>()
-let sse: EventSource   | null = null
-let ws:  WebSocket     | null = null
+let activePage: Page = 'dashboard'
+let appCounter = 0
+const apps = new Map<string, MicroApp>()
+let sse: EventSource | null = null
+let ws: WebSocket | null = null
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
@@ -328,7 +329,10 @@ function mountMfe(
   selector: string,
   props: Record<string, unknown> = {}
 ): void {
-  const name = `${key}-${++appCounter}`
+  // The vite-plugin-qiankun configuration in the MFEs registers the lifecycle hooks
+  // under the name '<key>-canvas' (e.g. 'graph-canvas', 'bpmn-canvas').
+  // The name passed to loadMicroApp MUST match this exactly when sandbox is false.
+  const name = `${key}-canvas`
 
   const app = loadMicroApp(
     {
@@ -389,7 +393,7 @@ async function navigate(to: Page): Promise<void> {
   switch (to) {
     case 'overview':
       mountMfe('graph', GRAPH_URL, '#mount-overview-graph', { mode: 'card' })
-      mountMfe('bpmn',  BPMN_URL,  '#mount-overview-bpmn',  { mode: 'card' })
+      mountMfe('bpmn', BPMN_URL, '#mount-overview-bpmn', { mode: 'card' })
       break
     case 'graph':
       mountMfe('graph', GRAPH_URL, '#mount-graph-full', { mode: 'full' })
@@ -409,7 +413,7 @@ function startSSE(): void {
   const es = new EventSource(`${META_BFF}/api/events`)
   sse = es
 
-  es.onopen  = () => setTransport('sse', true)
+  es.onopen = () => setTransport('sse', true)
   es.onerror = () => setTransport('sse', false)
 
   es.addEventListener('snapshot', (e: MessageEvent) => {
@@ -466,9 +470,9 @@ function startWS(): void {
 
 function applySnapshot(snap: DashboardSnapshot): void {
   const svcs = snap.services ?? []
-  setText('kpi-total',   svcs.length)
+  setText('kpi-total', svcs.length)
   setText('kpi-healthy', svcs.filter((s) => s.status === 'healthy').length)
-  setText('kpi-issue',   svcs.filter((s) => s.status !== 'healthy').length)
+  setText('kpi-issue', svcs.filter((s) => s.status !== 'healthy').length)
 
   const grid = document.getElementById('svc-grid')
   if (!grid) return
@@ -539,6 +543,26 @@ function init(): void {
   document.getElementById('root')!.addEventListener('click', (e) => {
     const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('[data-page]')
     if (btn?.dataset['page']) navigate(btn.dataset['page'] as Page)
+  })
+
+  // ── single-spa timeout config ──────────────────────────────────────────────
+  // Override the default 4000 ms lifecycle timeouts. In dev mode MFEs take
+  // longer because Vite serves un-bundled ESM with on-demand transpilation.
+  // dieOnTimeout: false  → app stays in LOADING rather than SKIP_BECAUSE_BROKEN
+  setBootstrapMaxTime(60000, false)
+  setMountMaxTime(60000, false)
+  setUnmountMaxTime(60000, false)
+
+  // Start qiankun — configures single-spa and global error handler.
+  // prefetch: false because we load MFEs on-demand via loadMicroApp.
+  start({
+    prefetch: false,
+    sandbox: false,
+  })
+
+  // Suppress noisy single-spa errors in the console during dev
+  addGlobalUncaughtErrorHandler((event) => {
+    console.warn('[shell] qiankun global error (suppressed):', event)
   })
 
   startSSE()

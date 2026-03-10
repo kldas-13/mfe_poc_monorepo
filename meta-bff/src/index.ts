@@ -42,15 +42,15 @@
  * ═══════════════════════════════════════════════════════════════════════════
  */
 
-import Fastify      from 'fastify'
-import cors         from '@fastify/cors'
-import wsPlugin     from '@fastify/websocket'
+import Fastify from 'fastify'
+import cors from '@fastify/cors'
+import wsPlugin from '@fastify/websocket'
 import { buildSnapshot } from './services.js'
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const PORT         = Number(process.env['PORT'] ?? 3000)
-const INTERVAL_MS  = 5_000   // how often to push a new snapshot to all clients
+const PORT = Number(process.env['PORT'] ?? 3000)
+const INTERVAL_MS = 5_000   // how often to push a new snapshot to all clients
 const HEARTBEAT_MS = 20_000  // SSE comment to keep proxies from timing out the connection
 
 // ─── Server ───────────────────────────────────────────────────────────────────
@@ -77,7 +77,7 @@ await app.register(wsPlugin)
 // know about the underlying Node.js response stream.
 
 interface SseClient {
-  id:    string
+  id: string
   write: (event: string, data: string) => void
 }
 
@@ -95,7 +95,7 @@ function sseSend(client: SseClient, event: string, data: string): void {
 // ─── WebSocket client registry ────────────────────────────────────────────────
 
 interface WsClient {
-  id:     string
+  id: string
   socket: { send: (data: string) => void; readyState: number }
 }
 
@@ -148,10 +148,10 @@ setInterval(broadcast, INTERVAL_MS)
 // ─── REST: liveness probe ─────────────────────────────────────────────────────
 
 app.get('/api/health', async () => ({
-  status:  'ok',
+  status: 'ok',
   service: 'meta-bff',
-  port:    PORT,
-  ts:      Date.now(),
+  port: PORT,
+  ts: Date.now(),
 }))
 
 // ─── REST: one-shot snapshot ──────────────────────────────────────────────────
@@ -178,10 +178,11 @@ app.get('/api/snapshot', async (_req, reply) => {
 
 app.get('/api/events', async (req, reply) => {
   // Required headers for a valid SSE stream
-  reply.raw.setHeader('Content-Type',      'text/event-stream')
-  reply.raw.setHeader('Cache-Control',     'no-cache, no-transform')
-  reply.raw.setHeader('Connection',        'keep-alive')
+  reply.raw.setHeader('Content-Type', 'text/event-stream')
+  reply.raw.setHeader('Cache-Control', 'no-cache, no-transform')
+  reply.raw.setHeader('Connection', 'keep-alive')
   reply.raw.setHeader('X-Accel-Buffering', 'no')  // disable Nginx buffering
+  reply.raw.setHeader('Access-Control-Allow-Origin', '*')
   reply.raw.flushHeaders()
 
   const clientId = crypto.randomUUID()
@@ -220,7 +221,7 @@ app.get('/api/events', async (req, reply) => {
 
   // Return a never-resolving promise to keep the Fastify handler alive.
   // Fastify would otherwise close the response after the handler returns.
-  return new Promise<void>(() => {})
+  return new Promise<void>(() => { })
 })
 
 // ─── WebSocket: /ws ───────────────────────────────────────────────────────────
@@ -259,8 +260,8 @@ app.register(async (instance) => {
             // Respond with a pong — the shell uses this for latency checks
             socket.send(JSON.stringify({
               type: 'pong',
-              id:   msg.id ?? null,
-              ts:   Date.now(),
+              id: msg.id ?? null,
+              ts: Date.now(),
             }))
           }
           // Future: handle 'subscribe', 'unsubscribe', 'command' messages here

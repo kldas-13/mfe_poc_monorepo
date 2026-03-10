@@ -17,16 +17,15 @@ export default defineConfig(() => ({
     origin: 'http://localhost:5174',
     cors: true,
     headers: {
-      'Access-Control-Allow-Origin':  '*',
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': 'GET, HEAD, OPTIONS',
       'Access-Control-Allow-Headers': '*',
     },
   },
 
-  build: {
-    target:       'esnext',
-    minify:       false,
-    cssCodeSplit: false,
-    rollupOptions: { treeshake: false },
+
+  optimizeDeps: {
+    include: ['graphology', 'graphology-layout/circular', 'graphology-layout-forceatlas2', 'sigma'],
+    esbuildOptions: { target: 'esnext' },
   },
 }))
