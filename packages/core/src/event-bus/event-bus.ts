@@ -1,3 +1,4 @@
+import { DEFAULT_PRIORITY } from '../constants'
 import {
     EventCallback,
     EventPayload,
@@ -7,8 +8,6 @@ import {
     Unsubscribe,
 } from '../types'
 import { BaseEvent } from './base-event'
-
-const DEFAULT_PRIORITY = 1000
 
 export class EventBus<
     TEventMap extends Record<string, Record<string, unknown>> = Record<
