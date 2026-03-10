@@ -251,7 +251,19 @@ const PORT        = Number(process.env['PORT'] ?? 3002)
 const HEARTBEAT_MS = 20_000
 
 const app = Fastify({ logger: { level: process.env['LOG_LEVEL'] ?? 'warn' } })
-await app.register(cors, { origin: true })
+await app.register(cors, {
+  origin: [
+    'http://localhost:5173',  // meta-shell
+    'http://localhost:5175',  // self (standalone dev mode)
+  ],
+  methods: ['GET', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept', 'Cache-Control'],
+  credentials: false,
+})
+
+
+
+
 await app.register(wsPlugin)
 
 // ─── Client registries ────────────────────────────────────────────────────────
@@ -371,6 +383,10 @@ app.get<{ Params: { id: string } }>('/api/workflows/:id/events', async (req, rep
     return
   }
 
+  
+   // CORS must go on reply.raw — flushHeaders() sends raw headers only
+  reply.raw.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*')
+  reply.raw.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Cache-Control')
   reply.raw.setHeader('Content-Type',      'text/event-stream')
   reply.raw.setHeader('Cache-Control',     'no-cache, no-transform')
   reply.raw.setHeader('Connection',        'keep-alive')

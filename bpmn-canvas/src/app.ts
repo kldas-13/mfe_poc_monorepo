@@ -381,7 +381,11 @@ function clearHighlight(): void {
 
 async function populateSelect(selectEl: HTMLSelectElement): Promise<void> {
   try {
-    const res  = await fetch(`${BFF}/api/workflows`)
+    const res  = await fetch(`${BFF}/api/workflows` , {
+  method: 'GET',
+  headers: { 'Accept': 'application/json' },
+  credentials: 'omit', 
+})
     const list: WorkflowSummary[] = await res.json()
     selectEl.innerHTML = list
       .map((w) => `<option value="${w.id}">${w.name}</option>`)
@@ -489,7 +493,7 @@ function openWS(els: BcElements): WebSocket {
         const { step } = msg.data as { step: StepEvent }
         // Only log to bus from WS to avoid double-emit with SSE
         // (In production, pick ONE transport as the authoritative source)
-        _ = step // acknowledge receipt — SSE handles the actual highlight
+        _(step) // acknowledge receipt — SSE handles the actual highlight
       }
     } catch { /* ignore malformed */ }
   }

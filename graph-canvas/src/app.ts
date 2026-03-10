@@ -518,7 +518,11 @@ async function mountApp(props: MountProps): Promise<void> {
 
   // Bootstrap from REST first — fast initial render before SSE delivers
   try {
-    const res  = await fetch(`${BFF}/api/graph/topology`)
+    const res = await fetch(`${BFF}/api/graph/topology`, {
+  method: 'GET',
+  headers: { 'Accept': 'application/json' },
+  credentials: 'omit',   // never send cookies cross-origin
+})
     const topo: Topology = await res.json()
     applyTopology(graph, topo)
     computeLayout(graph)

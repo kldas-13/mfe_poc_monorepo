@@ -118,7 +118,19 @@ const METRICS_MS  = 5_000   // how often to push simulated metrics
 const HEARTBEAT_MS = 20_000
 
 const app = Fastify({ logger: { level: process.env['LOG_LEVEL'] ?? 'warn' } })
-await app.register(cors, { origin: true })
+await app.register(cors, {
+  origin: [
+    'http://localhost:5173',  // meta-shell (overview page mounts this MFE)
+    'http://localhost:5174',  // self (standalone dev mode)
+  ],
+  methods: ['GET', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept', 'Cache-Control'],
+  credentials: false,
+})
+
+
+
+
 await app.register(wsPlugin)
 
 // ─── Client registries ────────────────────────────────────────────────────────
@@ -184,6 +196,9 @@ app.get('/api/graph/topology', async () => topology)
 //   es.addEventListener('graph:metrics', e => JSON.parse(e.data))
 
 app.get('/api/graph/events', async (req, reply) => {
+   // CORS must go on reply.raw — flushHeaders() sends raw headers only
+  reply.raw.setHeader('Access-Control-Allow-Origin', req.headers.origin ?? '*')
+  reply.raw.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept, Cache-Control')
   reply.raw.setHeader('Content-Type',      'text/event-stream')
   reply.raw.setHeader('Cache-Control',     'no-cache, no-transform')
   reply.raw.setHeader('Connection',        'keep-alive')

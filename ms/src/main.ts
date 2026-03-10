@@ -10,7 +10,7 @@ window.__UC_BUS = bus
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const META_BFF  = 'http://localhost:3000'
+const META_BFF  = ''
 const GRAPH_URL = 'http://localhost:5174/'
 const BPMN_URL  = 'http://localhost:5175/'
 

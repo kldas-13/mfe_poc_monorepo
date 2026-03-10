@@ -11,9 +11,6 @@ export default defineConfig(() => ({
   server: {
     port: 5174,
     host: '0.0.0.0',
-    // origin: tells Vite what absolute URL to embed in <script src> inside
-    // the HTML it serves. Without this, scripts resolve against the shell's
-    // origin (:5173) and 404. This is the #1 cause of blank canvas.
     origin: 'http://localhost:5174',
     cors: true,
     headers: {
@@ -22,6 +19,10 @@ export default defineConfig(() => ({
       'Access-Control-Allow-Headers': '*',
     },
   },
+
+  optimizeDeps: {
+  include: ['qiankun', 'import-html-entry'],
+},
 
   build: {
     target:       'esnext',

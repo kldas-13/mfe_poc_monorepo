@@ -64,8 +64,22 @@ const app = Fastify({
 
 // CORS — open to all origins in dev so the shell on :5173 can reach us
 await app.register(cors, {
-  origin: true,
+  origin: [
+    'http://localhost:5173',  // meta-shell
+    'http://localhost:5174',  // graph-canvas MFE (in overview mode, both are on screen)
+    'http://localhost:5175',  // bpmn-canvas MFE
+  ],
   methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Accept', 'Cache-Control'],
+  exposedHeaders: ['Content-Type'],
+  credentials: false,
+})
+
+app.addHook('onRequest', (_req, reply, done) => {
+  reply.header('Access-Control-Allow-Origin',  '*')
+  reply.header('Access-Control-Allow-Methods', 'GET, OPTIONS')
+  reply.header('Access-Control-Allow-Headers', 'Content-Type, Accept, Cache-Control')
+  done()
 })
 
 await app.register(wsPlugin)

@@ -28,7 +28,8 @@ export default defineConfig(() => ({
   },
 
   optimizeDeps: {
-    include: ['bpmn-js'],
+    include: ['bpmn-js', 'qiankun', 'import-html-entry'],
     esbuildOptions: { target: 'esnext' },
   },
+
 }))
