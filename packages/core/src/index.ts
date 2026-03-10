@@ -10,3 +10,5 @@ export {
 } from './types'
 
 export { DEFAULT_PRIORITY } from './constants'
+
+export { logger } from './logger'
