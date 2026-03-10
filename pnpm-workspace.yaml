@@ -1,0 +1,5 @@
+packages:
+  - 'bpmn-canvas'
+  - 'graph-canvas'
+  - 'meta-bff'
+  - 'ms'

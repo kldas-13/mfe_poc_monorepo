@@ -1,0 +1,14 @@
+{
+  "name": "mfe-poc-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev:bpmn": "pnpm --filter bpmn-canvas dev",
+    "dev:graph": "pnpm --filter graph-canvas dev",
+    "dev:meta": "pnpm --filter meta-bff dev",
+    "dev:ms": "pnpm --filter ms dev",
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "install:all": "pnpm install"
+  }
+}
