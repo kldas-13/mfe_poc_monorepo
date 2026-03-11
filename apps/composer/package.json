@@ -1,16 +1,17 @@
 {
-  "name": "@meta-ux/composer",
-  "private": true,
-  "version": "0.0.0",
-  "type": "module",
-  "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "preview": "vite preview",
-    "lint": "eslint src"
-  },
-  "dependencies": {
-    "@meta-ux/core": "workspace:*",
-    "@meta-ux/plugin": "workspace:*"
-  }
+    "name": "@meta-ux/composer",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "tsc && vite build",
+        "preview": "vite preview",
+        "lint": "eslint src"
+    },
+    "dependencies": {
+        "@meta-ux/core": "workspace:*",
+        "@meta-ux/plugin": "workspace:*",
+        "qiankun": "^2.10.16"
+    }
 }
