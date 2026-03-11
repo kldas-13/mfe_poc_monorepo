@@ -71,7 +71,8 @@ setDefaultMountApp('/unified-canvas')
 // ── Start ─────────────────────────────────────────────────────────────────────
 start({
     sandbox: {
-        strictStyleIsolation: false, // set true to use Shadow DOM isolation
+        // TODO (2026-03-11 16:34): setting this true setting coep policy in headers which is breaking api calls to other services(noticed on cdn images)
+        // strictStyleIsolation: false,
         experimentalStyleIsolation: true,
     },
     prefetch: 'all', // prefetch other apps after first app mounts
