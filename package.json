@@ -1,0 +1,26 @@
+{
+  "name": "@uc/mfe-core",
+  "version": "0.1.0",
+  "description": "Shared MFE model, builder, routes, EventBus and WSClient for the Unified Canvas platform",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0"
+  },
+  "peerDependencies": {
+    "qiankun": "^2.10.0"
+  }
+}
