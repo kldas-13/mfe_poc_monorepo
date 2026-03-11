@@ -6,7 +6,7 @@
     "scripts": {
         "prepare": "husky",
         "dev": "pnpm -r --parallel dev",
-        "build": "pnpm -r build",
+        "build": "pnpm -r --sort build",
         "lint": "pnpm -r lint"
     },
     "keywords": [],
@@ -28,14 +28,10 @@
         "vite": "^7.3.1"
     },
     "lint-staged": {
-        "apps/**/*.{ts,tsx}": [
-            "pnpm --filter @meta-ux/composer lint",
-            "pnpm --filter @meta-ux/mfe lint"
+        "*.{ts,tsx}": [
+            "eslint"
         ],
-        "packages/**/*.{ts}": [
-            "pnpm -r --filter './packages/**' lint"
-        ],
-        "**/*.{json,md,yaml}": [
+        "*.{json,md,yaml}": [
             "prettier --write"
         ]
     }
