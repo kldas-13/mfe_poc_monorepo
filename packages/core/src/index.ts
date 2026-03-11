@@ -1,14 +1,10 @@
-export { EventBus, BaseEvent } from './event-bus'
+// ── Child app API (the only things a child app should ever import) ────────────
+export { defineMicroApp } from './core/define-micro-app'
 
-export {
-    IBaseEvent,
-    EventCallback,
-    EventPayload,
-    Listener,
-    OnOptions,
-    Unsubscribe,
+// ── Types ─────────────────────────────────────────────────────────────────────
+export type {
+    // App definition
+    MicroAppDefinition,
+    MicroAppProps,
+    QiankunLifecycles,
 } from './types'
-
-export { DEFAULT_PRIORITY } from './constants'
-
-export { logger } from './logger'
