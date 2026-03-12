@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Shell</title>
+        <link href="/src/style.css" rel="stylesheet" />
+    </head>
+    <body>
+        <div class="shell">
+            <header class="header">
+                <span class="header__logo">SHELL</span>
+                <span class="header__tag">micro-frontend</span>
+                <div class="header__env">
+                    <span class="header__env-dot"></span>
+                    <span id="env-label">dev · localhost:8080</span>
+                </div>
+            </header>
+
+            <nav class="nav">
+                <span class="nav__section-label">Apps</span>
+                <button class="nav__link" data-route="/cart">
+                    <span class="nav__link-icon">🛒</span>
+                    Cart App
+                </button>
+                <button class="nav__link" data-route="/unified-canvas">
+                    <span class="nav__link-icon">🛒</span>
+                    Unified Canvas
+                </button>
+
+                <div class="nav__divider"></div>
+                <span class="nav__section-label">Shell</span>
+
+                <button class="nav__link" data-route="/">
+                    <span class="nav__link-icon">⌂</span>
+                    Home
+                </button>
+            </nav>
+
+            <main class="main">
+                <div id="micro-app-loading">
+                    <div class="loading__spinner"></div>
+                    <span class="loading__label">Loading app…</span>
+                </div>
+
+                <div id="load-app"></div>
+
+                <div id="micro-app-viewport">
+                    <div class="empty-state">
+                        <span class="empty-state__label">Select an app</span>
+                    </div>
+                </div>
+            </main>
+        </div>
+
+        <script type="module" src="/src/main.ts"></script>
+    </body>
+</html>
