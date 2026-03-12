@@ -1,6 +1,15 @@
-import { MicroAppDefinition, QiankunLifecycles } from '../types'
+import { MicroAppDefinition, QiankunLifeCycleMethods } from '../types'
 import { normalizeProps } from './normalize-props'
 import { resolveContainer } from './resolve-container'
+
+export function isQiankun(): boolean {
+    const w = window as any
+    return (
+        w.proxy != null ||
+        w.__POWERED_BY_QIANKUN__ === true ||
+        typeof w.qiankunName === 'string'
+    )
+}
 
 /**
  * Wraps your app definition into qiankun-compatible lifecycle exports.
@@ -10,8 +19,7 @@ import { resolveContainer } from './resolve-container'
  * You never touch qiankun, window.proxy, or lifecycle wiring directly.
  *
  * @example
- * // src/main.ts
- * import { defineMicroApp } from 'micro-core'
+ * import { defineMicroApp } from '@meta-ux/core'
  *
  * export default defineMicroApp({
  *   name: 'cart-app',
@@ -31,7 +39,7 @@ import { resolveContainer } from './resolve-container'
  */
 export function defineMicroApp(
     definition: MicroAppDefinition
-): QiankunLifecycles {
+): QiankunLifeCycleMethods {
     // Qiankun calls this once before the first mount.
     async function bootstrap(): Promise<void> {
         console.debug(`[${definition.name}] bootstrap`)

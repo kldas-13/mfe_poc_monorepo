@@ -1,22 +1,16 @@
-// ─── Props the shell passes down to every child app ──────────────────────────
-
-export interface MicroAppProps {
-    /** The DOM node qiankun allocated — render your app here */
+export interface QiankunProps {
     container?: HTMLElement
-    /** Base path this app is mounted at e.g. '/cart' */
+    [x: string]: any
+}
+
+export interface MicroAppProps extends QiankunProps {
     routerBase?: string
-    /** Auth token from the shell */
     token?: string
-    /** Shell-provided navigation — use instead of history directly */
     onNavigate?: (path: string, options?: { replace?: boolean }) => void
-    /** Escape hatch: everything else the shell passed */
     [key: string]: unknown
 }
 
-// ─── What the child app author defines ───────────────────────────────────────
-
 export interface MicroAppDefinition {
-    /** Must match the name in vite.config and shell registration */
     name: string
 
     /**
@@ -27,8 +21,6 @@ export interface MicroAppDefinition {
 
     /**
      * Called every time qiankun activates this app.
-     * @param props  Typed props from the shell
-     * @param container  The DOM node to render into (resolved for you)
      */
     mount(props: MicroAppProps, container: HTMLElement): void | Promise<void>
 
@@ -44,11 +36,15 @@ export interface MicroAppDefinition {
     update?(props: MicroAppProps): void | Promise<void>
 }
 
-// ─── What the plugin reads off the ES module ─────────────────────────────────
+export type QiankunLifeCycleMethods = {
+    bootstrap: () => void | Promise<void>
+    mount: (props: MicroAppProps) => void | Promise<void>
+    unmount: (props: MicroAppProps) => void | Promise<void>
+    update: (props: MicroAppProps) => void | Promise<void>
+}
 
-export interface QiankunLifecycles {
-    bootstrap(): Promise<void>
-    mount(rawProps: Record<string, unknown>): Promise<void>
-    unmount(rawProps: Record<string, unknown>): Promise<void>
-    update(rawProps: Record<string, unknown>): Promise<void>
+export interface QiankunWindow {
+    // eslint-disable-next-line @typescript-eslint/naming-convention
+    __POWERED_BY_QIANKUN__?: boolean
+    [x: string]: any
 }

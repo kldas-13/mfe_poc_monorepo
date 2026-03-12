@@ -21,7 +21,7 @@ function needsCrossOriginWorkaround(scriptUrl: string | URL): boolean {
         const workerOrigin = new URL(scriptUrl).origin
         if (workerOrigin !== window.location.origin) return true
     } catch {
-        return false // relative or blob URL — already same origin
+        return false
     }
     if ((window as any).proxy != null) return true
     if ((window as any).__POWERED_BY_QIANKUN__) return true
