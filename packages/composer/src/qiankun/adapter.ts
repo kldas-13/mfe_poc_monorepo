@@ -5,12 +5,15 @@ import {
     setDefaultMountApp,
     type RegistrableApp,
     type AppMetadata,
+    loadMicroApp,
 } from 'qiankun'
 import type {
     MicroApp,
     LifecycleHooks,
     StartOptions,
     MicroOrchestrator,
+    LoadAppOptions,
+    MicroAppInstance,
 } from '../types'
 
 export class QiankunAdapter implements MicroOrchestrator {
@@ -65,5 +68,32 @@ export class QiankunAdapter implements MicroOrchestrator {
     navigateTo(route: string): void {
         history.pushState(null, '', route)
         window.dispatchEvent(new PopStateEvent('popstate'))
+    }
+
+    loadApp(app: MicroApp, options: LoadAppOptions = {}): MicroAppInstance {
+        const instance = loadMicroApp(
+            {
+                name: app.name,
+                entry: app.entry,
+                container: app.container,
+                props: {
+                    ...(app.props ?? {}),
+                    ...(options.props ?? {}),
+                },
+            },
+            {
+                sandbox: options.sandbox ?? {
+                    experimentalStyleIsolation: true,
+                },
+            }
+        )
+
+        return {
+            mount: () => instance.mountPromise,
+            unmount: () => instance.unmountPromise,
+            update: (customProps) =>
+                instance.update?.(customProps) ?? Promise.resolve(null),
+            getStatus: () => instance.getStatus(),
+        }
     }
 }

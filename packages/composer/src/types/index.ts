@@ -22,10 +22,26 @@ export interface StartOptions {
     }
 }
 
+export interface LoadAppOptions {
+    props?: Record<string, unknown>
+    sandbox?: {
+        experimentalStyleIsolation?: boolean
+        strictStyleIsolation?: boolean
+    }
+}
+
 export interface MicroOrchestrator {
     register(apps: MicroApp[], hooks?: LifecycleHooks): void
     start(options?: StartOptions): void
     setDefault(route: string): void
     onError(handler: (event: string | Event) => void): void
     navigateTo(route: string): void
+    loadApp(app: MicroApp, options?: LoadAppOptions): MicroAppInstance
+}
+
+export interface MicroAppInstance {
+    mount(): Promise<null>
+    unmount(): Promise<null>
+    update(customProps: Record<string, unknown>): Promise<null>
+    getStatus(): string
 }
