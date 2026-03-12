@@ -42,8 +42,11 @@ importers:
         specifier: ^7.3.1
         version: 7.3.1(@types/node@25.4.0)(jiti@2.6.1)(lightningcss@1.31.1)(yaml@2.8.2)
 
-  apps/composer:
+  apps/composer-shell:
     dependencies:
+      '@meta-ux/composer':
+        specifier: workspace:*
+        version: link:../../packages/composer
       '@meta-ux/core':
         specifier: workspace:*
         version: link:../../packages/core
@@ -78,6 +81,22 @@ importers:
       '@meta-ux/plugin':
         specifier: workspace:*
         version: link:../../packages/plugin
+
+  packages/composer:
+    dependencies:
+      qiankun:
+        specifier: ^2.10.16
+        version: 2.10.16
+    devDependencies:
+      '@types/node':
+        specifier: ^25.4.0
+        version: 25.4.0
+      tsup:
+        specifier: ^8.0.0
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.8)(typescript@5.9.3)(yaml@2.8.2)
+      typescript:
+        specifier: ^5.5.3
+        version: 5.9.3
 
   packages/core:
     dependencies:
