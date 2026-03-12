@@ -78,7 +78,7 @@ const { mount, unmount, bootstrap, update } = defineMicroApp({
 
         console.log(props)
 
-        container.innerHTML = `<h1>Cart App</h1><p>Mounted at ${props.routerBase}</p>`
+        container.innerHTML = `<h1>Cart App</h1><p>Mounted at ${props.routerBase}</p> <p>Loaded using ${props.loadedFrom}</p>`
 
         // standalone guard — works when opened directly without the shell
         // @ts-ignore

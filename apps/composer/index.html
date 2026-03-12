@@ -8,7 +8,6 @@
     </head>
     <body>
         <div class="shell">
-            <!-- ── Header ─────────────────────────────────────────────────────────── -->
             <header class="header">
                 <span class="header__logo">SHELL</span>
                 <span class="header__tag">micro-frontend</span>
@@ -18,14 +17,8 @@
                 </div>
             </header>
 
-            <!-- ── Sidebar nav ────────────────────────────────────────────────────── -->
             <nav class="nav">
                 <span class="nav__section-label">Apps</span>
-
-                <!--
-        data-route must match the activeRule in src/apps.ts
-        Add one <button> per micro-app registered there
-      -->
                 <button class="nav__link" data-route="/cart">
                     <span class="nav__link-icon">🛒</span>
                     Cart App
@@ -34,13 +27,6 @@
                     <span class="nav__link-icon">🛒</span>
                     Unified Canvas
                 </button>
-
-                <!-- Uncomment when you add more apps to src/apps.ts
-      <button class="nav__link" data-route="/profile">
-        <span class="nav__link-icon">👤</span>
-        Profile App
-      </button>
-      -->
 
                 <div class="nav__divider"></div>
                 <span class="nav__section-label">Shell</span>
@@ -51,15 +37,14 @@
                 </button>
             </nav>
 
-            <!-- ── Main content area ──────────────────────────────────────────────── -->
             <main class="main">
-                <!-- Loading overlay — shown during app load, hidden after afterMount -->
                 <div id="micro-app-loading">
                     <div class="loading__spinner"></div>
                     <span class="loading__label">Loading app…</span>
                 </div>
 
-                <!-- Qiankun mounts child apps into this node -->
+                <div id="load-app"></div>
+
                 <div id="micro-app-viewport">
                     <div class="empty-state">
                         <span class="empty-state__label">Select an app</span>

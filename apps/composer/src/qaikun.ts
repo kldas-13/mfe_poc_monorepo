@@ -6,7 +6,7 @@ import {
     type RegistrableApp,
 } from 'qiankun'
 import microApps from './apps'
-import { navigateTo } from './routers'
+import { Router } from './routers'
 
 // ── Global error handler ──────────────────────────────────────────────────────
 addGlobalUncaughtErrorHandler((event) => {
@@ -30,7 +30,7 @@ const registrable: RegistrableApp<Record<string, unknown>>[] = microApps.map(
         props: {
             ...(app.props ?? {}),
             // Shared helpers passed to every child app
-            onNavigate: navigateTo,
+            onNavigate: Router.navigateTo,
             getToken: () => localStorage.getItem('auth_token'),
         },
     })
