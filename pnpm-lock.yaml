@@ -53,9 +53,6 @@ importers:
       '@meta-ux/types':
         specifier: workspace:*
         version: link:../../packages/types
-      qiankun:
-        specifier: ^2.10.16
-        version: 2.10.16
     devDependencies:
       '@tailwindcss/postcss':
         specifier: ^4.2.1
@@ -84,6 +81,9 @@ importers:
 
   packages/composer:
     dependencies:
+      '@meta-ux/core':
+        specifier: workspace:*
+        version: link:../core
       '@meta-ux/types':
         specifier: workspace:*
         version: link:../types

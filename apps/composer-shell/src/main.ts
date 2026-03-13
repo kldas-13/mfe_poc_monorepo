@@ -1,8 +1,6 @@
-import { createOrchestrator } from '@meta-ux/composer'
+import { createOrchestrator, registerMicroAppLoader } from '@meta-ux/composer'
 import microApps from './apps'
-import './components/micro-app-loader'
-// ── Wire up nav links ──────────────────────────────────────────────────────────
-
+registerMicroAppLoader()
 const orchestrator = createOrchestrator()
 
 // Error handling

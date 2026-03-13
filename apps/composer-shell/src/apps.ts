@@ -8,6 +8,7 @@ const microApps: MicroApp[] = [
         activeRule: '/cart',
         props: {
             routerBase: '/cart',
+            loadedFrom: 'registerApp',
         },
     },
     {

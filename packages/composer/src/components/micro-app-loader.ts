@@ -1,4 +1,5 @@
 import { loadMicroApp, type MicroApp } from 'qiankun'
+import { registerElement } from '@meta-ux/core'
 
 export class MicroAppLoader extends HTMLElement {
     private _microApp: MicroApp | null = null
@@ -109,6 +110,6 @@ export class MicroAppLoader extends HTMLElement {
     }
 }
 
-if (!customElements.get('micro-app-loader')) {
-    customElements.define('micro-app-loader', MicroAppLoader)
+export function registerMicroAppLoader() {
+    registerElement('micro-app-loader', MicroAppLoader)
 }
