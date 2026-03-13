@@ -12,7 +12,7 @@
     "dependencies": {
         "@meta-ux/composer": "workspace:*",
         "@meta-ux/core": "workspace:*",
-        "@meta-ux/plugin": "workspace:*",
+        "@meta-ux/types": "workspace:*",
         "qiankun": "^2.10.16"
     },
     "devDependencies": {

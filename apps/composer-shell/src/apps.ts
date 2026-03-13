@@ -1,4 +1,4 @@
-import { MicroApp } from '@meta-ux/composer'
+import { MicroApp } from '@meta-ux/types'
 
 const microApps: MicroApp[] = [
     {

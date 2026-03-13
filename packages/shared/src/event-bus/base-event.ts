@@ -1,4 +1,4 @@
-import { IBaseEvent } from '../types'
+import { IBaseEvent } from '@meta-ux/types'
 
 export class BaseEvent<
     TType extends string = string,

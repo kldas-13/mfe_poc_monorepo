@@ -6,7 +6,7 @@ import {
     Listener,
     OnOptions,
     Unsubscribe,
-} from '../types'
+} from '@meta-ux/types'
 import { BaseEvent } from './base-event'
 
 export class EventBus<

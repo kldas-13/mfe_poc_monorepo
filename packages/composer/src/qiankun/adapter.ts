@@ -7,6 +7,7 @@ import {
     type AppMetadata,
     loadMicroApp,
 } from 'qiankun'
+
 import type {
     MicroApp,
     LifecycleHooks,
@@ -14,7 +15,7 @@ import type {
     MicroOrchestrator,
     LoadAppOptions,
     MicroAppInstance,
-} from '../types'
+} from '@meta-ux/types'
 
 export class QiankunAdapter implements MicroOrchestrator {
     register(apps: MicroApp[], hooks: LifecycleHooks = {}): void {

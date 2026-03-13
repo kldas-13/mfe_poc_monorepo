@@ -1,7 +1,5 @@
 import { PluginOption } from 'vite'
 
-// ─── Lifecycle Hooks ──────────────────────────────────────────────────────────
-
 export type QiankunLifecycleName = 'bootstrap' | 'mount' | 'unmount' | 'update'
 
 export interface QiankunLifecycle {
@@ -10,8 +8,6 @@ export interface QiankunLifecycle {
     unmount: (props: unknown) => Promise<void>
     update: (props: unknown) => Promise<void>
 }
-
-// ─── Asset Handling ───────────────────────────────────────────────────────────
 
 export type AssetInjectStrategy = 'dynamic-import' | 'fetch' | 'none'
 
@@ -30,8 +26,6 @@ export interface AssetConfig {
      */
     publicPath?: string
 }
-
-// ─── Communication ────────────────────────────────────────────────────────────
 
 export interface CommunicationConfig {
     /**
@@ -53,8 +47,6 @@ export interface CommunicationConfig {
     injectProps?: boolean
 }
 
-// ─── CSS Isolation ────────────────────────────────────────────────────────────
-
 export type CssIsolationStrategy =
     | 'none'
     | 'scoped' // wraps styles with [data-qiankun="appName"] selector
@@ -73,8 +65,6 @@ export interface CssConfig {
     injectReset?: boolean
 }
 
-// ─── Dev Mode ────────────────────────────────────────────────────────────────
-
 export interface DevConfig {
     /**
      * Enable dev-specific transforms (dynamic import for @vite/client, HMR support).
@@ -92,8 +82,6 @@ export interface DevConfig {
      */
     allowedOrigins?: string[]
 }
-
-// ─── Plugin Root Config ───────────────────────────────────────────────────────
 
 export interface MicroAppConfig {
     /**
@@ -132,7 +120,5 @@ export interface MicroAppConfig {
         afterUnmount?: (props: unknown) => void | Promise<void>
     }
 }
-
-// ─── Plugin Function Signature ────────────────────────────────────────────────
 
 export type QiankunPluginFn = (config: MicroAppConfig) => PluginOption

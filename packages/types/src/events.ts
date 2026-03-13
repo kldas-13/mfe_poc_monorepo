@@ -25,13 +25,8 @@ export interface Listener {
 export type Unsubscribe = () => void
 
 export interface OnOptions {
-    /**
-     * Higher number = runs first. Default: 1000.
-     */
+    /** Higher number = runs first. Default: 1000. */
     priority?: number
-    /**
-     * Tag this listener with an owner name (e.g. "mfe-cart").
-     * Enables bulk removal via `bus.offOwner("mfe-cart")`.
-     */
+    /** Tag this listener with an owner name (e.g. "mfe-cart"). Enables bulk removal via `bus.offOwner("mfe-cart")`. */
     owner?: string
 }

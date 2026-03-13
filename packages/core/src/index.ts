@@ -1,15 +1,8 @@
-import { QiankunWindow } from './types'
+import { QiankunWindow } from '@meta-ux/types'
 
 export { defineMicroApp, isQiankun } from './core/define-micro-app'
 
 export { createWorker } from './helpers/create-worker'
-
-export type {
-    MicroAppDefinition,
-    MicroAppProps,
-    QiankunLifeCycleMethods,
-    QiankunWindow,
-} from './types'
 
 export const qiankunWindow: QiankunWindow =
     // @ts-expect-error window.proxy might be udefined

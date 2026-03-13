@@ -1,4 +1,4 @@
-import { MicroAppDefinition, QiankunLifeCycleMethods } from '../types'
+import { MicroAppDefinition, QiankunLifeCycleMethods } from '@meta-ux/types'
 import { normalizeProps } from './normalize-props'
 import { resolveContainer } from './resolve-container'
 

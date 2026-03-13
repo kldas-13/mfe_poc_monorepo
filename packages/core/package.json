@@ -24,7 +24,8 @@
         "lint": "eslint src"
     },
     "dependencies": {
-        "@meta-ux/shared": "workspace:*"
+        "@meta-ux/shared": "workspace:*",
+        "@meta-ux/types": "workspace:*"
     },
     "devDependencies": {
         "@types/node": "^25.4.0",

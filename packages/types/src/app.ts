@@ -1,8 +1,17 @@
+/**
+ * App descriptor used when registering apps with the orchestrator.
+ * This is YOUR type — never import qiankun's RegistrableApp directly.
+ */
 export interface MicroApp {
+    /** Must match the name in the child app's plugin config */
     name: string
+    /** URL of the child app's dev server or build output */
     entry: string
+    /** CSS selector of the DOM node to mount the child app into */
     container: string
+    /** Shell-side route that activates this app */
     activeRule: string
+    /** Arbitrary props forwarded to the child app's mount() */
     props?: Record<string, unknown>
 }
 
@@ -30,15 +39,10 @@ export interface LoadAppOptions {
     }
 }
 
-export interface MicroOrchestrator {
-    register(apps: MicroApp[], hooks?: LifecycleHooks): void
-    start(options?: StartOptions): void
-    setDefault(route: string): void
-    onError(handler: (event: string | Event) => void): void
-    navigateTo(route: string): void
-    loadApp(app: MicroApp, options?: LoadAppOptions): MicroAppInstance
-}
-
+/**
+ * Handle returned by orchestrator.loadApp().
+ * Gives you manual control over a loaded app's lifecycle.
+ */
 export interface MicroAppInstance {
     mount(): Promise<null>
     unmount(): Promise<null>

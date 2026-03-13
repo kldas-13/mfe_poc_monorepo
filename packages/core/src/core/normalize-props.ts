@@ -1,4 +1,4 @@
-import { MicroAppProps } from '../types'
+import { MicroAppProps } from '@meta-ux/types'
 
 /**
  * Strips qiankun internals from props and gives the app author a clean object.
