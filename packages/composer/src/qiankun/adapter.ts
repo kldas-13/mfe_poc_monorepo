@@ -18,7 +18,11 @@ import type {
 } from '@meta-ux/types'
 
 export class QiankunAdapter implements MicroOrchestrator {
+    private microAppRules: Array<MicroApp['activeRule']> = []
+
     register(apps: MicroApp[], hooks: LifecycleHooks = {}): void {
+        this.microAppRules = apps.map((a) => a.activeRule)
+
         const registrable: RegistrableApp<Record<string, unknown>>[] = apps.map(
             (app) => ({
                 name: app.name,
@@ -66,9 +70,29 @@ export class QiankunAdapter implements MicroOrchestrator {
         addGlobalUncaughtErrorHandler(handler)
     }
 
+    isMicroAppRoute(path: string): boolean {
+        return this.microAppRules.some((rule) => {
+            if (typeof rule === 'function') {
+                // create a minimal Location-like object
+                return rule({ pathname: path } as Location)
+            }
+            if (Array.isArray(rule)) {
+                return rule.some((r) => path.startsWith(r))
+            }
+            return path.startsWith(rule)
+        })
+    }
+
     navigateTo(route: string): void {
         history.pushState(null, '', route)
-        window.dispatchEvent(new PopStateEvent('popstate'))
+
+        //  Only dispatch popstate if this is NOT a micro-app route.
+        // For micro-app routes, qiankun's internal listener on history already
+        // handles mount/unmount — firing popstate ourselves causes the shell
+        // router to intercept and redirect.
+        if (!this.isMicroAppRoute(route)) {
+            window.dispatchEvent(new PopStateEvent('popstate'))
+        }
     }
 
     loadApp(app: MicroApp, options: LoadAppOptions = {}): MicroAppInstance {

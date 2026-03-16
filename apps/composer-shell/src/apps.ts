@@ -20,6 +20,17 @@ const microApps: MicroApp[] = [
             routerBase: '/unified-canvas',
         },
     },
+    {
+        name: 'kya',
+        entry: '//localhost:5174',
+        container: '#micro-app-viewport',
+        activeRule: (location) => location.pathname.startsWith('/kya'),
+        props: {
+            routerBase: '/kya',
+            basename: '/kya',
+            baseurl: 'http://localhost:5174/',
+        },
+    },
 ]
 
 export default microApps

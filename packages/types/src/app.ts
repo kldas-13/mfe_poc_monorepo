@@ -1,17 +1,38 @@
 /**
  * App descriptor used when registering apps with the orchestrator.
- * This is YOUR type — never import qiankun's RegistrableApp directly.
+ * Reflects qiankun's full RegisterMicroAppsConfig shape.
  */
 export interface MicroApp {
     /** Must match the name in the child app's plugin config */
     name: string
-    /** URL of the child app's dev server or build output */
-    entry: string
-    /** CSS selector of the DOM node to mount the child app into */
-    container: string
-    /** Shell-side route that activates this app */
-    activeRule: string
-    /** Arbitrary props forwarded to the child app's mount() */
+
+    /** URL of the child app's dev server or build output
+     *  e.g. '//localhost:5174' or 'https://app.example.com'
+     */
+    entry:
+        | string
+        | {
+              /** Individual script URLs to load */
+              scripts?: string[]
+              /** Individual style URLs to load */
+              styles?: string[]
+              /** Inline HTML string used as the app's root markup */
+              html?: string
+          }
+
+    /** CSS selector or an HTMLElement to mount the child app into */
+    container: string | HTMLElement
+
+    /**
+     * When this app should be activated.
+     * - string  → qiankun treats it as a pathname prefix  e.g. '/kya'
+     * - string[] → any of the prefixes activate the app
+     * - function → full control, return true to activate
+     *              e.g. (location) => location.pathname.startsWith('/kya')
+     */
+    activeRule: string | string[] | ((location: Location) => boolean)
+
+    /** Arbitrary props forwarded to the child app's bootstrap/mount/unmount */
     props?: Record<string, unknown>
 }
 

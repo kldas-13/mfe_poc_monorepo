@@ -27,7 +27,7 @@ orchestrator.register(microApps, {
     },
 })
 
-orchestrator.setDefault('/unified-canvas')
+// orchestrator.setDefault('/unified-canvas')
 
 orchestrator.start({
     prefetch: 'all',
@@ -68,13 +68,25 @@ document.querySelectorAll<HTMLElement>('[data-route]').forEach((link) => {
 
             if (container) {
                 if (route === '/') {
-                    container.innerHTML = `<micro-app-loader
-                        style="width: 1000px; height: 100px"
-                        class="bg-red-200"
-                        app-name="cart-app"
-                        entry="http://localhost:3002"
-                    >
-                    </micro-app-loader>`
+                    const loader = document.createElement('micro-app-loader')
+
+                    loader.style.width = '1000px'
+                    loader.style.height = '100px'
+                    loader.classList.add('bg-red-200')
+
+                    loader.setAttribute('app-name', 'kya')
+                    loader.setAttribute('entry', 'http://localhost:5174')
+
+                    // @ts-ignore
+                    loader.props = {
+                        basename: '/ontograph',
+                        baseurl: 'http://localhost:5174/',
+                        hashRouting: true,
+                        navigateTo:
+                            '/graph?graphtype=HERMES&agentId=01KJSF4XJN3M8QFKZ3QXN2JZVY',
+                    }
+
+                    container.replaceChildren(loader)
                 } else {
                     container.innerHTML = ''
                 }
