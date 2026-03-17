@@ -16,7 +16,19 @@ export class Router {
     }
 
     static getActiveApp(path = location.pathname) {
-        return microApps.find((app) => path.startsWith(app.activeRule)) ?? null
+        return (
+            microApps.find((app) => {
+                if (typeof app.activeRule === 'string') {
+                    return path.startsWith(app.activeRule)
+                }
+
+                if (Array.isArray(app.activeRule)) {
+                    return path.startsWith(app.activeRule[0])
+                }
+
+                return app.activeRule(location)
+            }) ?? null
+        )
     }
 
     static syncNavHighlight(): void {
