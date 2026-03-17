@@ -1,6 +1,10 @@
 import { QiankunWindow } from '@meta-ux/types'
 
-export { defineMicroApp, isQiankun } from './core/define-micro-app'
+export {
+    defineMicroApp,
+    isQiankun,
+    isMicroFrontendEnv,
+} from './core/define-micro-app'
 
 export { createWorker } from './helpers/create-worker'
 export { registerElement } from './helpers/register-elements'

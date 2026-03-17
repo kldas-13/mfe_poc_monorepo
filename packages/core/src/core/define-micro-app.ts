@@ -74,3 +74,7 @@ export function defineMicroApp(
 
     return { bootstrap, mount, unmount, update }
 }
+
+export function isMicroFrontendEnv(): boolean {
+    return isQiankun()
+}
